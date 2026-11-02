@@ -1,0 +1,18 @@
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_ID: ${NEXT_PUBLIC_APP_ID}
+        NEXT_PUBLIC_APP_KEY: ${NEXT_PUBLIC_APP_KEY}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: xiaowang-webapp:latest
+    container_name: xiaowang-webapp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
