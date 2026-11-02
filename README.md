@@ -1,27 +1,26 @@
-# Conversation Web App Template
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 小望
+
+基于 Next.js 的对话 Web 应用。
 
 ## Config App
 Create a file named `.env.local` in the current directory and copy the contents from `.env.example`. Setting the following content:
 ```
-# APP ID: This is the unique identifier for your app. You can find it in the app's detail page URL. 
-# For example, in the URL `https://cloud.dify.ai/app/xxx/workflow`, the value `xxx` is your APP ID.
+# APP ID
 NEXT_PUBLIC_APP_ID=
 
-# APP API Key: This is the key used to authenticate your app's API requests. 
-# You can generate it on the app's "API Access" page by clicking the "API Key" button in the top-right corner.
+# APP API Key
 NEXT_PUBLIC_APP_KEY=
 
-# APP URL: This is the API's base URL. If you're using the Dify cloud service, set it to: https://api.dify.ai/v1.
+# API URL
 NEXT_PUBLIC_API_URL=
 ```
 
 Config more in `config/index.ts` file:   
 ```js
 export const APP_INFO: AppInfo = {
-  title: 'Chat APP',
+  title: '小望',
   description: '',
-  copyright: '',
+  copyright: '小望',
   privacy_policy: '',
   default_language: 'zh-Hans'
 }

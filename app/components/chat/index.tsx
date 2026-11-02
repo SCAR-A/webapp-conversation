@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react'
 import cn from 'classnames'
 import { useTranslation } from 'react-i18next'
 import Textarea from 'rc-textarea'
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid'
 import s from './style.module.css'
 import Answer from './answer'
 import Question from './question'
@@ -147,97 +148,137 @@ const Chat: FC<IChatProps> = ({
     handleSend()
   }
 
-  return (
-    <div className={cn(!feedbackDisabled && 'px-3.5', 'h-full')}>
-      {/* Chat List */}
-      <div className="h-full space-y-[30px]">
-        {chatList.map((item) => {
-          if (item.isAnswer) {
-            const isLast = item.id === chatList[chatList.length - 1].id
-            return <Answer
-              key={item.id}
-              item={item}
-              feedbackDisabled={feedbackDisabled}
-              onFeedback={onFeedback}
-              isResponding={isResponding && isLast}
-              suggestionClick={suggestionClick}
-            />
-          }
-          return (
-            <Question
-              key={item.id}
-              id={item.id}
-              content={item.content}
-              useCurrentUserAvatar={useCurrentUserAvatar}
-              imgSrcs={(item.message_files && item.message_files?.length > 0) ? item.message_files.map(item => item.url) : []}
-            />
-          )
-        })}
-      </div>
-      {
-        !isHideSendInput && (
-          <div className='fixed z-10 bottom-0 left-1/2 transform -translate-x-1/2 pc:ml-[122px] tablet:ml-[96px] mobile:ml-0 pc:w-[794px] tablet:w-[794px] max-w-full mobile:w-full px-3.5'>
-            <div className='p-[5.5px] max-h-[150px] bg-white border-[1.5px] border-gray-200 rounded-xl overflow-y-auto'>
-              {
-                visionConfig?.enabled && (
-                  <>
-                    <div className='absolute bottom-2 left-2 flex items-center'>
-                      <ChatImageUploader
-                        settings={visionConfig}
-                        onUpload={onUpload}
-                        disabled={files.length >= visionConfig.number_limits}
-                      />
-                      <div className='mx-1 w-[1px] h-4 bg-black/5' />
-                    </div>
-                    <div className='pl-[52px]'>
-                      <ImageList
-                        list={files}
-                        onRemove={onRemove}
-                        onReUpload={onReUpload}
-                        onImageLinkLoadSuccess={onImageLinkLoadSuccess}
-                        onImageLinkLoadError={onImageLinkLoadError}
-                      />
-                    </div>
-                  </>
-                )
-              }
-              {
-                fileConfig?.enabled && (
-                  <div className={`${visionConfig?.enabled ? 'pl-[52px]' : ''} mb-1`}>
-                    <FileUploaderInAttachmentWrapper
-                      fileConfig={fileConfig}
-                      value={attachmentFiles}
-                      onChange={setAttachmentFiles}
-                    />
-                  </div>
-                )
-              }
-              <Textarea
-                className={`
-                  block w-full px-2 pr-[118px] py-[7px] leading-5 max-h-none text-base text-gray-700 outline-none appearance-none resize-none
-                  ${visionConfig?.enabled && 'pl-12'}
-                `}
-                value={query}
-                onChange={handleContentChange}
-                onKeyUp={handleKeyUp}
-                onKeyDown={handleKeyDown}
-                autoSize
-              />
-              <div className="absolute bottom-2 right-6 flex items-center h-8">
-                <div className={`${s.count} mr-3 h-5 leading-5 text-sm bg-gray-50 text-gray-500 px-2 rounded`}>{query.trim().length}</div>
-                <Tooltip
-                  selector='send-tip'
-                  htmlContent={
-                    <div>
-                      <div>{t('common.operation.send')} Enter</div>
-                      <div>{t('common.operation.lineBreak')} Shift Enter</div>
-                    </div>
-                  }
-                >
-                  <div className={`${s.sendBtn} w-8 h-8 cursor-pointer rounded-md`} onClick={handleSend}></div>
-                </Tooltip>
+  const canSend = query.trim().length > 0
+  const hasUserMessage = chatList.some(item => !item.isAnswer)
+  const isEmptyChat = !hasUserMessage
+
+  const renderComposer = (centered = false) => (
+    <div className={cn(
+      centered
+        ? 'w-full max-w-[720px] mx-auto px-0'
+        : 'w-full max-w-chat mx-auto',
+    )}>
+      <div className={`${s.composer} relative p-3.5 max-h-[200px] overflow-y-auto`}>
+        {
+          visionConfig?.enabled && (
+            <>
+              <div className="flex items-center mb-2">
+                <ChatImageUploader
+                  settings={visionConfig}
+                  onUpload={onUpload}
+                  disabled={files.length >= visionConfig.number_limits}
+                />
               </div>
+              <div className="mb-2">
+                <ImageList
+                  list={files}
+                  onRemove={onRemove}
+                  onReUpload={onReUpload}
+                  onImageLinkLoadSuccess={onImageLinkLoadSuccess}
+                  onImageLinkLoadError={onImageLinkLoadError}
+                />
+              </div>
+            </>
+          )
+        }
+        {
+          fileConfig?.enabled && (
+            <div className="mb-2">
+              <FileUploaderInAttachmentWrapper
+                fileConfig={fileConfig}
+                value={attachmentFiles}
+                onChange={setAttachmentFiles}
+              />
             </div>
+          )
+        }
+        <div className="flex items-end gap-2">
+          <Textarea
+            className="block w-full px-2 py-2.5 leading-6 max-h-none text-[15px] text-gray-800 outline-none appearance-none resize-none bg-transparent placeholder:text-gray-400"
+            value={query}
+            onChange={handleContentChange}
+            onKeyUp={handleKeyUp}
+            onKeyDown={handleKeyDown}
+            autoSize
+            placeholder="给 小望 发送消息"
+          />
+          <Tooltip
+            selector="send-tip"
+            htmlContent={
+              <div>
+                <div>{t('common.operation.send')} Enter</div>
+                <div>{t('common.operation.lineBreak')} Shift Enter</div>
+              </div>
+            }
+          >
+            <button
+              type="button"
+              className={`${s.sendBtn} ${!canSend ? s.sendBtnDisabled : ''} shrink-0`}
+              onClick={() => { if (canSend) { handleSend() } }}
+              disabled={!canSend}
+              aria-label="Send"
+            >
+              <PaperAirplaneIcon className="w-4 h-4 -rotate-45 translate-x-[-1px] translate-y-[1px]" />
+            </button>
+          </Tooltip>
+        </div>
+      </div>
+      {!centered && (
+        <div className="text-center text-[11px] text-gray-400 mt-2">
+          AI 生成内容仅供参考
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div className={cn(!feedbackDisabled && 'px-0', 'h-full')}>
+      {isEmptyChat
+        ? (
+          <div className="min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center px-2 pb-24">
+            <div className="flex items-center gap-3 mb-10">
+              <img src="/logo-mark.png" alt="小望" className="w-10 h-10 object-contain" draggable={false} />
+              <h1 className="text-[26px] pc:text-[30px] font-semibold text-gray-900 tracking-tight">
+                你好，我能帮什么忙吗？
+              </h1>
+            </div>
+            {!isHideSendInput && (
+              <div className="w-full">
+                {renderComposer(true)}
+              </div>
+            )}
+          </div>
+        )
+        : (
+          <div className="h-full space-y-[18px] pt-4 pb-[148px]">
+            {chatList.map((item) => {
+              if (item.isAnswer) {
+                const isLast = item.id === chatList[chatList.length - 1].id
+                return <Answer
+                  key={item.id}
+                  item={item}
+                  feedbackDisabled={feedbackDisabled}
+                  onFeedback={onFeedback}
+                  isResponding={isResponding && isLast}
+                  suggestionClick={suggestionClick}
+                />
+              }
+              return (
+                <Question
+                  key={item.id}
+                  id={item.id}
+                  content={item.content}
+                  useCurrentUserAvatar={useCurrentUserAvatar}
+                  imgSrcs={(item.message_files && item.message_files?.length > 0) ? item.message_files.map(item => item.url) : []}
+                />
+              )
+            })}
+          </div>
+        )}
+      {
+        !isHideSendInput && !isEmptyChat && (
+          <div className="fixed z-10 bottom-0 right-0 left-0 pc:left-[260px] tablet:left-[220px] mobile:left-0 px-4 mobile:px-3 pb-3 pt-8 bg-gradient-to-t from-white via-white to-transparent">
+            {renderComposer(false)}
           </div>
         )
       }

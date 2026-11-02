@@ -14,28 +14,22 @@ type IQuestionProps = Pick<IChatItem, 'id' | 'content' | 'useCurrentUserAvatar'>
 const Question: FC<IQuestionProps> = ({ id, content, useCurrentUserAvatar, imgSrcs }) => {
   const userName = ''
   return (
-    <div className='flex items-start justify-end' key={id}>
-      <div>
-        <div className={`${s.question} relative text-sm text-gray-900`}>
-          <div
-            className={'mr-2 py-3 px-4 bg-blue-500 rounded-tl-2xl rounded-b-2xl'}
-          >
-            {imgSrcs && imgSrcs.length > 0 && (
+    <div className="flex items-start justify-end gap-2" key={id}>
+      <div className="max-w-[78%] mobile:max-w-[88%]">
+        <div className={`${s.userBubble} relative text-[15px] leading-[1.5] px-4 py-3`}>
+          {imgSrcs && imgSrcs.length > 0 && (
+            <div className="mb-2">
               <ImageGallery srcs={imgSrcs} />
-            )}
-            <StreamdownMarkdown content={content} />
-          </div>
+            </div>
+          )}
+          <StreamdownMarkdown content={content} />
         </div>
       </div>
-      {useCurrentUserAvatar
-        ? (
-          <div className='w-10 h-10 shrink-0 leading-10 text-center mr-2 rounded-full bg-primary-600 text-white'>
-            {userName?.[0].toLocaleUpperCase()}
-          </div>
-        )
-        : (
-          <div className={`${s.questionIcon} w-10 h-10 shrink-0 `}></div>
-        )}
+      {useCurrentUserAvatar && (
+        <div className="w-7 h-7 shrink-0 leading-7 text-center rounded-full bg-primary-600 text-white text-xs font-semibold">
+          {userName?.[0]?.toLocaleUpperCase() || 'U'}
+        </div>
+      )}
     </div>
   )
 }

@@ -5,11 +5,12 @@ import { useTranslation } from 'react-i18next'
 import TemplateVarPanel, { PanelTitle, VarOpBtnGroup } from '../value-panel'
 import FileUploaderInAttachmentWrapper from '../base/file-uploader-in-attachment'
 import s from './style.module.css'
-import { AppInfoComp, ChatBtn, EditBtn, FootLogo, PromptTemplate } from './massive-component'
+import { ChatBtn, EditBtn, PromptTemplate } from './massive-component'
 import type { AppInfo, PromptConfig } from '@/types/app'
 import Toast from '@/app/components/base/toast'
 import Select from '@/app/components/base/select'
 import { DEFAULT_VALUE_MAX_LEN } from '@/config'
+import AppIcon from '@/app/components/base/app-icon'
 
 // regex to match the {{}} and replace it with a span
 const regex = /\{\{([^}]+)\}\}/g
@@ -30,7 +31,7 @@ const Welcome: FC<IWelcomeProps> = ({
   conversationName,
   hasSetInputs,
   isPublicVersion,
-  siteInfo,
+  siteInfo: _siteInfo,
   promptConfig,
   onStartChat,
   canEditInputs,
@@ -81,27 +82,27 @@ const Welcome: FC<IWelcomeProps> = ({
 
   const renderHeader = () => {
     return (
-      <div className='absolute top-0 left-0 right-0 flex items-center justify-between border-b border-gray-100 mobile:h-12 tablet:h-16 px-8 bg-white'>
-        <div className='text-gray-900'>{conversationName}</div>
+      <div className="sticky top-0 z-[5] flex items-center justify-between border-b border-ds-divider mobile:h-12 tablet:h-14 px-4 tablet:px-6 bg-white/90 backdrop-blur-sm">
+        <div className="text-sm font-medium text-gray-800 truncate">{conversationName}</div>
       </div>
     )
   }
 
   const renderInputs = () => {
     return (
-      <div className='space-y-3'>
+      <div className="space-y-3">
         {promptConfig.prompt_variables.map(item => (
-          <div className='tablet:flex items-start mobile:space-y-2 tablet:space-y-0 mobile:text-xs tablet:text-sm' key={item.key}>
+          <div className="tablet:flex items-start mobile:space-y-2 tablet:space-y-0 mobile:text-xs tablet:text-sm" key={item.key}>
             <label className={`flex-shrink-0 flex items-center tablet:leading-9 mobile:text-gray-700 tablet:text-gray-900 mobile:font-medium pc:font-normal ${s.formLabel}`}>{item.name}</label>
             {item.type === 'select'
               && (
                 <Select
-                  className='w-full'
+                  className="w-full"
                   defaultValue={inputs?.[item.key]}
                   onSelect={(i) => { setInputs({ ...inputs, [item.key]: i.value }) }}
                   items={(item.options || []).map(i => ({ name: i, value: i }))}
                   allowSearch={false}
-                  bgClassName='bg-gray-50'
+                  bgClassName="bg-gray-50"
                 />
               )}
             {item.type === 'string' && (
@@ -109,7 +110,7 @@ const Welcome: FC<IWelcomeProps> = ({
                 placeholder={`${item.name}${!item.required ? `(${t('app.variableTable.optional')})` : ''}`}
                 value={inputs?.[item.key] || ''}
                 onChange={(e) => { setInputs({ ...inputs, [item.key]: e.target.value }) }}
-                className={'w-full flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50'}
+                className="w-full flex-grow py-2 pl-3 pr-3 box-border rounded-lg bg-gray-50"
                 maxLength={item.max_length || DEFAULT_VALUE_MAX_LEN}
               />
             )}
@@ -172,87 +173,78 @@ const Welcome: FC<IWelcomeProps> = ({
   }
 
   const canChat = () => {
-    const vars = promptConfig?.prompt_variables ?? [];
+    const vars = promptConfig?.prompt_variables ?? []
 
-    const hasEmptyRequired = vars.some(v => {
-      const isRequired = v?.required ?? true;
-      if (!isRequired) return false;
+    const hasEmptyRequired = vars.some((v) => {
+      const isRequired = v?.required ?? true
+      if (!isRequired) { return false }
 
-      const val = inputs?.[v.key];
+      const val = inputs?.[v.key]
 
-      if (typeof val === 'string') return val.trim() === '';
+      if (typeof val === 'string') { return val.trim() === '' }
 
-      return val === undefined || val === null;
-    });
+      return val === undefined || val === null
+    })
 
     if (hasEmptyRequired) {
-      logError(t('app.errorMessage.valueOfVarRequired'));
-      return false;
+      logError(t('app.errorMessage.valueOfVarRequired'))
+      return false
     }
 
-    return true;
-  };
+    return true
+  }
 
   const handleChat = () => {
     if (!canChat()) { return }
 
     Object.keys(inputs).forEach((key) => {
-      if (!inputs[key])
-        delete inputs[key]
+      if (!inputs[key]) { delete inputs[key] }
     })
 
     onStartChat(inputs)
   }
 
+  // DeepSeek 风格空态：无变量时由 Main 自动 start，这里只作兜底展示
   const renderNoVarPanel = () => {
-    if (isPublicVersion) {
-      return (
-        <div>
-          <AppInfoComp siteInfo={siteInfo} />
-          <TemplateVarPanel
-            isFold={false}
-            header={
-              <>
-                <PanelTitle
-                  title={t('app.chat.publicPromptConfigTitle')}
-                  className='mb-1'
-                />
-                <PromptTemplate html={highLightPromoptTemplate} />
-              </>
-            }
-          >
-            <ChatBtn onClick={handleChat} />
-          </TemplateVarPanel>
-        </div>
-      )
-    }
-    // private version
     return (
-      <TemplateVarPanel
-        isFold={false}
-        header={
-          <AppInfoComp siteInfo={siteInfo} />
-        }
-      >
+      <div className="flex flex-col items-center justify-center w-full pt-[12vh] pc:pt-[18vh]">
+        <div className="flex items-center gap-3 mb-10">
+          <AppIcon size="large" />
+          <h1 className="text-[28px] pc:text-[32px] font-semibold text-gray-900 tracking-tight">
+            你好，我能帮什么忙吗？
+          </h1>
+        </div>
         <ChatBtn onClick={handleChat} />
-      </TemplateVarPanel>
+      </div>
     )
   }
 
   const renderVarPanel = () => {
     return (
-      <TemplateVarPanel
-        isFold={false}
-        header={
-          <AppInfoComp siteInfo={siteInfo} />
-        }
-      >
-        {renderInputs()}
-        <ChatBtn
-          className='mt-3 mobile:ml-0 tablet:ml-[128px]'
-          onClick={handleChat}
-        />
-      </TemplateVarPanel>
+      <div className="flex flex-col items-center w-full pt-[8vh]">
+        <div className="flex items-center gap-3 mb-8">
+          <AppIcon size="large" />
+          <h1 className="text-[26px] font-semibold text-gray-900 tracking-tight">
+            你好，我能帮什么忙吗？
+          </h1>
+        </div>
+        <div className="w-full max-w-[560px]">
+          <TemplateVarPanel
+            isFold={false}
+            header={
+              <div className="text-sm font-medium text-gray-700">
+                开始前请完善对话设置
+              </div>
+            }
+          >
+            {renderInputs()}
+            <ChatBtn
+              className="mt-3 mobile:ml-0 tablet:ml-[128px]"
+              onClick={handleChat}
+            />
+          </TemplateVarPanel>
+        </div>
+      </div>
     )
   }
 
@@ -282,7 +274,7 @@ const Welcome: FC<IWelcomeProps> = ({
             <>
               <PanelTitle
                 title={t('app.chat.publicPromptConfigTitle')}
-                className='mb-1'
+                className="mb-1"
               />
               <PromptTemplate html={highLightPromoptTemplate} />
             </>
@@ -298,12 +290,12 @@ const Welcome: FC<IWelcomeProps> = ({
           <>
             <PanelTitle
               title={t('app.chat.publicPromptConfigTitle')}
-              className='mb-1'
+              className="mb-1"
             />
             <PromptTemplate html={highLightPromoptTemplate} />
             {isFold && (
-              <div className='flex items-center justify-between mt-3 border-t border-indigo-100 pt-4 text-xs text-indigo-600'>
-                <span className='text-gray-700'>{t('app.chat.configStatusDes')}</span>
+              <div className="flex items-center justify-between mt-3 border-t border-ds-divider pt-4 text-xs text-primary-600">
+                <span className="text-gray-700">{t('app.chat.configStatusDes')}</span>
                 <EditBtn onClick={() => setIsFold(false)} />
               </div>
             )}
@@ -323,7 +315,7 @@ const Welcome: FC<IWelcomeProps> = ({
       <TemplateVarPanel
         isFold={isFold}
         header={
-          <div className='flex items-center justify-between text-indigo-600'>
+          <div className="flex items-center justify-between text-primary-600">
             <PanelTitle
               title={!isFold ? t('app.chat.privatePromptConfigTitle') : t('app.chat.configStatusDes')}
             />
@@ -343,58 +335,25 @@ const Welcome: FC<IWelcomeProps> = ({
     if ((!isPublicVersion && !canEditInputs) || !hasVar) { return null }
 
     return (
-      <div
-        className='pt-[88px] mb-5'
-      >
+      <div className="pt-4 mb-5">
         {isPublicVersion ? renderHasSetInputsPublic() : renderHasSetInputsPrivate()}
-      </div>)
+      </div>
+    )
   }
 
   return (
-    <div className='relative mobile:min-h-[48px] tablet:min-h-[64px]'>
-      {hasSetInputs && renderHeader()}
-      <div className='mx-auto pc:w-[794px] max-w-full mobile:w-full px-3.5'>
-        {/*  Has't set inputs  */}
+    <div className="relative">
+      {hasSetInputs && hasVar && renderHeader()}
+      <div className="mx-auto w-full max-w-chat px-4 mobile:px-3">
         {
           !hasSetInputs && (
-            <div className='mobile:pt-[72px] tablet:pt-[128px] pc:pt-[200px]'>
-              {hasVar
-                ? (
-                  renderVarPanel()
-                )
-                : (
-                  renderNoVarPanel()
-                )}
-            </div>
+            hasVar ? renderVarPanel() : renderNoVarPanel()
           )
         }
 
-        {/* Has set inputs */}
         {hasSetInputs && renderHasSetInputs()}
-
-        {/* foot */}
-        {!hasSetInputs && (
-          <div className='mt-4 flex justify-between items-center h-8 text-xs text-gray-400'>
-
-            {siteInfo.privacy_policy
-              ? <div>{t('app.chat.privacyPolicyLeft')}
-                <a
-                  className='text-gray-500'
-                  href={siteInfo.privacy_policy}
-                  target='_blank'
-                >{t('app.chat.privacyPolicyMiddle')}</a>
-                {t('app.chat.privacyPolicyRight')}
-              </div>
-              : <div>
-              </div>}
-            <a className='flex items-center pr-3 space-x-3' href="https://dify.ai/" target="_blank">
-              <span className='uppercase'>{t('app.chat.powerBy')}</span>
-              <FootLogo />
-            </a>
-          </div>
-        )}
       </div>
-    </div >
+    </div>
   )
 }
 

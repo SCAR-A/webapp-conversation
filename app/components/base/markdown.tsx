@@ -16,6 +16,14 @@ export function Markdown(props: { content: string }) {
           RehypeKatex,
         ]}
         components={{
+          p({ children }) {
+            return <div className="mb-2 last:mb-0">{children}</div>
+          },
+          img({ src, alt }) {
+            return (
+              <img src={src || ''} alt={alt || ''} className="my-2 max-w-full h-auto rounded-lg" />
+            )
+          },
           code({ node, inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '')
             return (!inline && match)

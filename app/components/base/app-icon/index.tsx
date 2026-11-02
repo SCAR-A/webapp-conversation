@@ -25,10 +25,15 @@ const AppIcon: FC<AppIconProps> = ({
         className ?? '',
       )}
       style={{
-        background,
+        background: background || 'transparent',
       }}
     >
-      🤖
+      <img
+        src="/logo-mark.png"
+        alt="小望"
+        className="w-[82%] h-[82%] object-contain"
+        draggable={false}
+      />
     </span>
   )
 }

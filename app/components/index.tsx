@@ -51,7 +51,7 @@ const Main: FC<IMainProps> = () => {
   const [fileConfig, setFileConfig] = useState<FileUpload | undefined>()
 
   useEffect(() => {
-    if (APP_INFO?.title) { document.title = `${APP_INFO.title} - Powered by Dify` }
+    if (APP_INFO?.title) { document.title = APP_INFO.title }
   }, [APP_INFO?.title])
 
   // onData change thought (the produce obj). https://github.com/immerjs/immer/issues/576
@@ -155,10 +155,20 @@ const Main: FC<IMainProps> = () => {
   }
   useEffect(handleConversationSwitch, [currConversationId, inited])
 
+  // 无变量时自动进入对话，展示 DeepSeek 风格空态，跳过「开始对话」卡片
+  useEffect(() => {
+    if (!inited || !promptConfig) { return }
+    if (!isNewConversation || isChatStarted) { return }
+    if ((promptConfig.prompt_variables || []).length > 0) { return }
+    handleStartChat({})
+  }, [inited, promptConfig, isNewConversation, isChatStarted])
+
   const handleConversationIdChange = (id: string) => {
     if (id === '-1') {
       createNewChat()
       setConversationIdChangeBecauseOfNew(true)
+      setChatNotStarted()
+      setChatList([])
     }
     else {
       setConversationIdChangeBecauseOfNew(false)
@@ -307,7 +317,7 @@ const Main: FC<IMainProps> = () => {
     let emptyRequiredInput = false
     promptConfig.prompt_variables.forEach((item) => {
       if (item.required && !currInputs[item.key])
-        emptyRequiredInput = true
+      { emptyRequiredInput = true }
     })
 
     if (emptyRequiredInput) {
@@ -641,9 +651,15 @@ const Main: FC<IMainProps> = () => {
     return (
       <Sidebar
         list={conversationList}
-        onCurrentIdChange={handleConversationIdChange}
+        onCurrentIdChange={(id) => {
+          handleConversationIdChange(id)
+          if (isMobile) { hideSidebar() }
+        }}
         currentId={currConversationId}
         copyRight={APP_INFO.copyright || APP_INFO.title}
+        title={APP_INFO.title}
+        isMobile={isMobile}
+        onClose={hideSidebar}
       />
     )
   }
@@ -653,51 +669,62 @@ const Main: FC<IMainProps> = () => {
   if (!APP_ID || !APP_INFO || !promptConfig) { return <Loading type='app' /> }
 
   return (
-    <div className='bg-gray-100'>
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       <Header
         title={APP_INFO.title}
         isMobile={isMobile}
         onShowSideBar={showSidebar}
         onCreateNewChat={() => handleConversationIdChange('-1')}
       />
-      <div className="flex rounded-t-2xl bg-white overflow-hidden">
+      <div className={`flex flex-1 overflow-hidden ${isMobile ? 'h-[calc(100vh_-_3rem)]' : 'h-screen'}`}>
         {/* sidebar */}
         {!isMobile && renderSidebar()}
         {isMobile && isShowSidebar && (
-          <div className='fixed inset-0 z-50' style={{ backgroundColor: 'rgba(35, 56, 118, 0.2)' }} onClick={hideSidebar} >
-            <div className='inline-block' onClick={e => e.stopPropagation()}>
+          <div
+            className="fixed inset-0 z-50"
+            style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
+            onClick={hideSidebar}
+          >
+            <div
+              className="inline-block h-full shadow-2xl animate-[slideIn_0.2s_ease-out] bg-white"
+              style={{ backgroundColor: '#FFFFFF' }}
+              onClick={e => e.stopPropagation()}
+            >
               {renderSidebar()}
             </div>
           </div>
         )}
         {/* main */}
-        <div className='flex-grow flex flex-col h-[calc(100vh_-_3rem)] overflow-y-auto'>
-          <ConfigSence
-            conversationName={conversationName}
-            hasSetInputs={hasSetInputs}
-            isPublicVersion={isShowPrompt}
-            siteInfo={APP_INFO}
-            promptConfig={promptConfig}
-            onStartChat={handleStartChat}
-            canEditInputs={canEditInputs}
-            savedInputs={currInputs as Record<string, any>}
-            onInputsChange={setCurrInputs}
-          ></ConfigSence>
+        <div className="flex-grow flex flex-col h-full overflow-hidden bg-white relative min-w-0">
+          <div className="flex-1 overflow-y-auto ds-scroll">
+            <ConfigSence
+              conversationName={conversationName}
+              hasSetInputs={hasSetInputs}
+              isPublicVersion={isShowPrompt}
+              siteInfo={APP_INFO}
+              promptConfig={promptConfig}
+              onStartChat={handleStartChat}
+              canEditInputs={canEditInputs}
+              savedInputs={currInputs as Record<string, any>}
+              onInputsChange={setCurrInputs}
+            />
 
-          {
-            hasSetInputs && (
-              <div className='relative grow pc:w-[794px] max-w-full mobile:w-full pb-[180px] mx-auto mb-3.5' ref={chatListDomRef}>
-                <Chat
-                  chatList={chatList}
-                  onSend={handleSend}
-                  onFeedback={handleFeedback}
-                  isResponding={isResponding}
-                  checkCanSend={checkCanSend}
-                  visionConfig={visionConfig}
-                  fileConfig={fileConfig}
-                />
-              </div>)
-          }
+            {
+              hasSetInputs && (
+                <div className="relative grow w-full max-w-chat mx-auto px-4 mobile:px-3" ref={chatListDomRef}>
+                  <Chat
+                    chatList={chatList}
+                    onSend={handleSend}
+                    onFeedback={handleFeedback}
+                    isResponding={isResponding}
+                    checkCanSend={checkCanSend}
+                    visionConfig={visionConfig}
+                    fileConfig={fileConfig}
+                  />
+                </div>
+              )
+            }
+          </div>
         </div>
       </div>
     </div>

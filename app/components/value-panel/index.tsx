@@ -21,16 +21,16 @@ const TemplateVarPanel: FC<ITemplateVarPanelProps> = ({
   isFold,
 }) => {
   return (
-    <div className={cn(isFold ? 'border border-indigo-100' : s.boxShodow, className, 'rounded-xl ')}>
+    <div className={cn(isFold ? 'border border-ds-divider' : s.boxShodow, className, 'rounded-2xl overflow-hidden bg-white')}>
       {/* header */}
       <div
-        className={cn(isFold && 'rounded-b-xl', 'rounded-t-xl px-6 py-4 bg-indigo-25 text-xs')}
+        className={cn(isFold && 'rounded-b-2xl', 'rounded-t-2xl px-6 py-5 bg-ds-surface text-xs')}
       >
         {header}
       </div>
       {/* body */}
       {!isFold && children && (
-        <div className='rounded-b-xl p-6'>
+        <div className="rounded-b-2xl p-6 bg-white">
           {children}
         </div>
       )}
@@ -43,9 +43,9 @@ export const PanelTitle: FC<{ title: string, className?: string }> = ({
   className,
 }) => {
   return (
-    <div className={cn(className, 'flex items-center space-x-1 text-indigo-600')}>
+    <div className={cn(className, 'flex items-center space-x-1 text-primary-600')}>
       <StarIcon />
-      <span className='text-xs'>{title}</span>
+      <span className="text-xs font-medium">{title}</span>
     </div>
   )
 }
@@ -60,19 +60,19 @@ export const VarOpBtnGroup: FC<{ className?: string, onConfirm: () => void, onCa
   return (
     <div className={cn(className, 'flex mt-3 space-x-2 mobile:ml-0 tablet:ml-[128px] text-sm')}>
       <Button
-        className='text-sm'
-        type='primary'
+        className="text-sm"
+        type="primary"
         onClick={onConfirm}
       >
         {t('common.operation.save')}
       </Button>
       <Button
-        className='text-sm'
+        className="text-sm"
         onClick={onCancel}
       >
         {t('common.operation.cancel')}
       </Button>
-    </div >
+    </div>
   )
 }
 

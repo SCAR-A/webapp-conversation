@@ -1,91 +1,104 @@
 .answerIcon {
   position: relative;
-  background: url(./icons/robot.svg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .typeingIcon {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: -2px;
+  right: -2px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   background: #FFFFFF;
-  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.08);
   border-radius: 16px;
 }
 
-
-.questionIcon {
-  background: url(./icons/default-avatar.jpg);
-  background-size: contain;
-  border-radius: 50%;
-}
-
-.answer::before,
-.question::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 8px;
-  height: 12px;
-}
-
-.answer::before {
-  left: 0;
-  background: url(./icons/answer.svg) no-repeat;
-}
-
 .answerWrap .itemOperation {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
-.answerWrap:hover .itemOperation {
-  display: flex;
+.answerWrap:hover .itemOperation,
+.answerWrap:focus-within .itemOperation {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.question::before {
-  right: 0;
-  background: url(./icons/question.svg) no-repeat;
+@media (hover: none) {
+  .answerWrap .itemOperation {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
-
-.textArea {
-  padding-top: 13px;
-  padding-bottom: 13px;
-  padding-right: 90px;
-  border-radius: 12px;
-  line-height: 20px;
-  background-color: #fff;
-}
-
-.textArea:hover {
-  background-color: #fff;
-}
-
-/* .textArea:focus {
-  box-shadow: 0px 3px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px rgba(0, 0, 0, 0.05);
-} */
 
 .count {
-  /* display: none; */
   padding: 0 2px;
 }
 
 .sendBtn {
-  background: url(./icons/send.svg) center center no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ds-blue, #4D6BFE);
+  color: #fff;
+  transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
 }
 
 .sendBtn:hover {
-  background-image: url(./icons/send-active.svg);
-  background-color: #EBF5FF;
+  background: var(--ds-blue-pressed, #3B57E0);
 }
 
-.textArea:focus+div .count {
-  display: block;
+.sendBtn:active {
+  transform: scale(0.96);
 }
 
-.textArea:focus+div .sendBtn {
-  background-image: url(./icons/send-active.svg);
+.sendBtnDisabled {
+  background: #E4E6EB;
+  color: #9A9BA0;
+  cursor: not-allowed;
+}
+
+.sendBtnDisabled:hover {
+  background: #E4E6EB;
+}
+
+.composer {
+  background: #FFFFFF;
+  border: 1px solid var(--ds-divider, #E4E6EB);
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.composer:focus-within {
+  border-color: #C5CDFF;
+  box-shadow: 0 4px 24px rgba(77, 107, 254, 0.08);
+}
+
+.userBubble {
+  background: var(--ds-blue-soft, #EBEFFF);
+  border-radius: 18px 18px 4px 18px;
+  color: var(--ds-text, #1A1B1E);
+}
+
+.assistantBody {
+  color: var(--ds-text, #1A1B1E);
+  font-size: 15px;
+  line-height: 1.6;
 }

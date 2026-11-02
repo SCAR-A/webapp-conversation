@@ -17,6 +17,7 @@ const translation = {
     like: 'like',
     dislike: 'dislike',
     ok: 'OK',
+    copy: 'Copy',
   },
   imageUploader: {
     uploadFromComputer: 'Upload from Computer',
