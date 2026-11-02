@@ -92,5 +92,14 @@
     "**/*.ts?(x)": [
       "eslint --fix"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "sharp",
+      "unrs-resolver",
+      "esbuild",
+      "husky"
+    ]
   }
 }
